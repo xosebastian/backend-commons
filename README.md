@@ -216,6 +216,23 @@ npm run build
 npm test
 ```
 
+### Pruebas
+
+Para ejecutar la suite de tests:
+
+```bash
+npm test
+```
+
+Para modo watch:
+
+```bash
+npm run test:watch
+```
+
+La cobertura se genera en `coverage/`.
+
+
 ### Roadmap
 - Validación de configuración con esquema y soporte para Secret Manager.
 - Redacción de PII en logs (Pino redact) configurable por entorno.
