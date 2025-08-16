@@ -1,5 +1,6 @@
 export * from './logger/gcp-logger.module';
 export * from './logger/gcp-logger.service';
+export * from './logger/mock-logger.service';
 export * from './config/app-config.module';
 export * from './config/app-config.service';
 export * from './config/config-validation';
