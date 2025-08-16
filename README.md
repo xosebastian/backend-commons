@@ -212,6 +212,7 @@ const { result, error, attempts } = await retry(() => callExternalAPI(), { retri
 
 ```bash
 npm run typecheck
+npm run lint
 npm run build
 npm test
 ```

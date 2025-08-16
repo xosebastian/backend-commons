@@ -35,5 +35,24 @@ describe('retry', () => {
     expect(fn).toHaveBeenCalledTimes(1);
     expect(result).toEqual({ result: 'ok', attempts: 1 });
   });
-});
 
+  it('waits the specified delay between retries', async () => {
+    jest.useFakeTimers();
+    const fn = jest
+      .fn()
+      .mockRejectedValueOnce(new Error('fail'))
+      .mockResolvedValue('ok');
+
+    const promise = retry(fn, { retries: 2, delayMs: 100 });
+
+    expect(fn).toHaveBeenCalledTimes(1);
+
+    await jest.advanceTimersByTimeAsync(100);
+    const result = await promise;
+
+    expect(fn).toHaveBeenCalledTimes(2);
+    expect(result).toEqual({ result: 'ok', attempts: 2 });
+
+    jest.useRealTimers();
+  });
+});
