@@ -9,22 +9,33 @@ export interface RetryResult<T> {
   readonly attempts: number;
 }
 
-export async function retry<T>(fn: () => Promise<T>, options: RetryOptions): Promise<RetryResult<T>> {
-  let attempts = 0;
+/**
+ * Retries the provided async function until it succeeds or the retry limit is reached.
+ * @param fn Async function to invoke.
+ * @param options Configuration for retry behavior.
+ * @returns Object containing either the result or last error and attempt count.
+ */
+export async function retry<T>(
+  fn: () => Promise<T>,
+  { retries, delayMs }: RetryOptions
+): Promise<RetryResult<T>> {
   let lastError: unknown;
-  while (attempts < options.retries) {
+
+  for (let attempt = 1; attempt <= retries; attempt++) {
     try {
       const result = await fn();
-      return { result, attempts: attempts + 1 };
+      return { result, attempts: attempt };
     } catch (err) {
-      attempts += 1;
       lastError = err;
-      if (attempts >= options.retries) {
+      if (attempt === retries) {
         break;
       }
-      await new Promise((resolve) => setTimeout(resolve, options.delayMs));
+      if (delayMs > 0) {
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
+      }
     }
   }
-  return { error: lastError, attempts };
+
+  return { error: lastError, attempts: retries };
 }
 

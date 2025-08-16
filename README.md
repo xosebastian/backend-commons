@@ -212,9 +212,27 @@ const { result, error, attempts } = await retry(() => callExternalAPI(), { retri
 
 ```bash
 npm run typecheck
+npm run lint
 npm run build
 npm test
 ```
+
+### Pruebas
+
+Para ejecutar la suite de tests:
+
+```bash
+npm test
+```
+
+Para modo watch:
+
+```bash
+npm run test:watch
+```
+
+La cobertura se genera en `coverage/`.
+
 
 ### Roadmap
 - Validación de configuración con esquema y soporte para Secret Manager.
