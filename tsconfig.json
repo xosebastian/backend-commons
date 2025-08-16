@@ -21,7 +21,7 @@
     "useDefineForClassFields": false,
     "types": ["node", "jest"]
   },
-  "include": ["src/**/*", "jest.setup.ts"],
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
 }
 
