@@ -1,0 +1,85 @@
+trigger:
+  tags:
+    include:
+      - v*
+pr: none
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  NODE_VERSION: '20.x'
+  GCP_PROJECT: 'c-irdgbp-bpg-b297'
+  GCP_REGION_NPM: 'us-central1-npm'   # host de npm: REGION-npm.pkg.dev
+  NPM_REPO: 'epago'
+  NPM_SCOPE: '@epago'
+
+steps:
+  - task: NodeTool@0
+    inputs: { versionSpec: '$(NODE_VERSION)' }
+    displayName: 'Use Node $(NODE_VERSION)'
+
+  - script: |
+      VERSION=$(echo "$(Build.SourceBranch)" | sed -E 's#refs/tags/v##')
+      if [ -n "$VERSION" ]; then
+        npm version --no-git-tag-version "$VERSION"
+      fi
+    displayName: 'Sync version from tag'
+    condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/v'))
+
+  - task: Npm@1
+    displayName: 'Install'
+    inputs: { command: 'custom', customCommand: 'ci' }
+
+  - task: Npm@1
+    displayName: 'Test'
+    inputs: { command: 'custom', customCommand: 'test -- --ci' }
+
+  - task: Npm@1
+    displayName: 'Build'
+    inputs: { command: 'custom', customCommand: 'run build' }
+
+  # ---- Publicación SOLO cuando es tag v* ----
+  # 1) Instalar gcloud
+  - bash: |
+      sudo apt-get update -y
+      sudo apt-get install -y apt-transport-https ca-certificates gnupg
+      echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" | sudo tee /etc/apt/sources.list.d/google-cloud-sdk.list
+      curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg
+      sudo apt-get update -y && sudo apt-get install -y google-cloud-sdk
+    displayName: 'Install gcloud'
+    condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/v'))
+
+  # 2) Descargar la key segura
+  - task: DownloadSecureFile@1
+    name: gcpKey
+    inputs:
+      secureFile: 'npm-publisher.json'   # <--- el nombre tal cual lo subiste
+    condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/v'))
+
+  # 3) Autenticarse con la key
+  - bash: |
+      gcloud auth activate-service-account \
+        --key-file "$(gcpKey.secureFilePath)"
+      gcloud config set project $(GCP_PROJECT)
+    displayName: 'Auth to GCP (Service Account key)'
+    condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/v'))
+
+  # 4) Publicar a Artifact Registry (npm)
+  - bash: |
+      set -e
+      REG_URL="https://$(GCP_REGION_NPM).pkg.dev/$(GCP_PROJECT)/$(NPM_REPO)/"
+      REG_HOST="$(GCP_REGION_NPM).pkg.dev/$(GCP_PROJECT)/$(NPM_REPO)/"
+
+      echo "$(NPM_SCOPE):registry=$REG_URL" > .npmrc
+      TOKEN="$(gcloud auth print-access-token)"
+      npm config set //${REG_HOST}:_authToken "$TOKEN"
+
+      npm whoami --registry="$REG_URL" || true
+      npm publish
+    displayName: 'Publish to Google Artifact Registry (npm)'
+    condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/v'))
+
+  - bash: rm -f .npmrc || true
+    displayName: 'Cleanup .npmrc'
+    condition: and(always(), startsWith(variables['Build.SourceBranch'], 'refs/tags/v'))
