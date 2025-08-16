@@ -1,0 +1,13 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "..",
+    "baseUrl": "./",
+    "paths": {
+      "@epago/backend-commons": ["../src"],
+      "backend-commons": ["../src"]
+    }
+  },
+  "include": ["src/**/*"]
+}

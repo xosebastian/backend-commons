@@ -152,13 +152,23 @@ exports.myBackgroundFunction = background;
 ### API Exportada
 
 - Config: `AppConfigModule`, `AppConfigService`
-- Logger: `GcpLoggerModule`, `GcpLoggerService`, `logger.types`
+- Logger: `GcpLoggerModule`, `GcpLoggerService`
 - Contexto: `RequestContextModule`, `RequestContextService`
 - Interceptors: `ContextInterceptor`, `LoggingInterceptor`
 - Filtros: `HttpExceptionFilter`
 - Validación: `ValidationPipe`
 - Errores: `AppError`, `ERROR_CODES`
 - Utils: `retry`
+
+### Aplicación de ejemplo
+
+En la carpeta `example` se incluye una aplicación NestJS que integra todos los módulos de la librería.
+Para ejecutarla localmente:
+
+```bash
+npm install
+npx ts-node example/src/main.ts
+```
 
 ### Ejemplos de uso
 
