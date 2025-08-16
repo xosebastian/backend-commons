@@ -5,11 +5,11 @@ import {
   NestInterceptor,
 } from '@nestjs/common';
 import { Observable, tap } from 'rxjs';
-import { LoggerService } from './logger.service';
+import { GcpLoggerService } from './gcp-logger.service';
 
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {
-  constructor(private readonly logger: LoggerService) {}
+  constructor(private readonly logger: GcpLoggerService) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const start = Date.now();

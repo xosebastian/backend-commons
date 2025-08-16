@@ -1,4 +1,4 @@
-import { als } from '../logger.service';
+import { als } from '../gcp-logger.service';
 
 export function LogContext(data: Record<string, any>): MethodDecorator {
   return (_target, _propertyKey, descriptor: PropertyDescriptor) => {

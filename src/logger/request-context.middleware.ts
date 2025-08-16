@@ -1,7 +1,7 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import { randomUUID } from 'node:crypto';
-import { als } from './logger.service';
+import { als } from './gcp-logger.service';
 
 @Injectable()
 export class RequestContextMiddleware implements NestMiddleware {
