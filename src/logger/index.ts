@@ -5,3 +5,4 @@ export * from './logging.interceptor';
 export * from './all-exceptions.filter';
 export * from './decorators/log-context.decorator';
 export * from './opentelemetry';
+export * from './mock-logger.service';
